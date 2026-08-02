@@ -1,0 +1,46 @@
+:root {
+  color-scheme: dark;
+  font-family: Inter, "Yu Gothic UI", "Hiragino Kaku Gothic ProN", system-ui, sans-serif;
+  background: #0e0d12;
+  color: #f6f3ff;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; width: 360px; background: radial-gradient(circle at 15% 0%, #2b1744 0, #111016 44%, #0e0d12 100%); }
+button, input { font: inherit; }
+.panel { min-height: 410px; padding: 20px; }
+.header { display: grid; grid-template-columns: 42px 1fr auto; align-items: center; gap: 11px; margin-bottom: 20px; }
+.eyebrow { margin: 0 0 1px; color: #b49add; font-size: 9px; font-weight: 800; letter-spacing: .22em; }
+h1 { margin: 0; font-size: 18px; letter-spacing: -.025em; }
+.brand-mark { width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; gap: 3px; border: 1px solid #ffffff1c; border-radius: 13px; background: linear-gradient(145deg, #a970ff, #6432a8); box-shadow: 0 8px 24px #9147ff40; }
+.brand-mark span { width: 3px; border-radius: 3px; background: white; }
+.brand-mark span:nth-child(1) { height: 10px; }.brand-mark span:nth-child(2) { height: 20px; }.brand-mark span:nth-child(3) { height: 14px; }
+.switch input { position: absolute; opacity: 0; }
+.switch span { display: block; width: 42px; height: 24px; padding: 3px; border-radius: 99px; background: #3c3944; cursor: pointer; transition: .2s; }
+.switch span::after { content: ""; display: block; width: 18px; height: 18px; border-radius: 50%; background: white; box-shadow: 0 2px 6px #0006; transition: .2s; }
+.switch input:checked + span { background: #9147ff; }
+.switch input:checked + span::after { transform: translateX(18px); }
+.hidden { display: none !important; }
+.state-card { display: grid; gap: 7px; padding: 18px; border: 1px solid #ffffff12; border-radius: 14px; background: #ffffff08; color: #bdb7c7; font-size: 12px; line-height: 1.55; }
+.state-card strong { color: #f6f3ff; font-size: 14px; }
+.channel-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.channel-row > div { display: grid; gap: 3px; }
+.label { color: #918b9b; font-size: 10px; }
+#channelName { font-size: 16px; }
+.status { padding: 5px 8px; border-radius: 999px; background: #2a2532; color: #afa7b9; font-size: 9px; font-weight: 700; }
+.status.connected { background: #1b3b31; color: #67e3b0; }
+.meter-card { padding: 16px 16px 12px; border: 1px solid #ffffff12; border-radius: 15px; background: linear-gradient(145deg, #211b2b, #17141d); box-shadow: inset 0 1px #ffffff08; }
+.value-row { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 13px; color: #aaa3b4; font-size: 11px; }
+#gainValue { color: #fff; font-size: 27px; font-weight: 750; letter-spacing: -.04em; }
+#gain { width: 100%; height: 5px; margin: 7px 0; border-radius: 10px; outline: none; appearance: none; background: linear-gradient(90deg, #9147ff var(--fill, 50%), #3b3544 var(--fill, 50%)); }
+#gain::-webkit-slider-thumb { width: 18px; height: 18px; appearance: none; border: 3px solid #fff; border-radius: 50%; background: #9147ff; box-shadow: 0 2px 10px #9147ff80; cursor: pointer; }
+.scale { display: flex; justify-content: space-between; color: #6f6978; font-size: 9px; }
+.presets { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin-top: 11px; }
+.presets button { padding: 8px 0; border: 1px solid #ffffff12; border-radius: 9px; background: #ffffff08; color: #c9c3d1; font-size: 10px; cursor: pointer; }
+.presets button:hover, .presets button.active { border-color: #9147ff99; background: #9147ff21; color: #d9c2ff; }
+.hint { margin: 14px 2px 10px; color: #797381; font-size: 10px; line-height: 1.55; }
+.warning { margin: 10px 0; padding: 9px 10px; border: 1px solid #efb84a40; border-radius: 9px; background: #efb84a12; color: #efc875; font-size: 10px; line-height: 1.45; }
+footer { display: flex; justify-content: space-between; padding-top: 8px; border-top: 1px solid #ffffff0d; }
+.text-button { padding: 7px 2px; border: 0; background: transparent; color: #968f9f; font-size: 10px; cursor: pointer; }
+.text-button:hover { color: #d7c0ff; }
+body.disabled #gain, body.disabled .presets, body.disabled #reset { opacity: .42; pointer-events: none; }
