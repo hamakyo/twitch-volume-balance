@@ -43,6 +43,10 @@
           </div>
           <input id="gain" type="range" min="0" max="200" step="5" value="100" aria-label="音量補正">
           <div class="scale"><span>0</span><span>100</span><span>200%</span></div>
+          <div class="live-meter" aria-label="現在の出力レベル">
+            <div class="meter-label"><span>出力レベル</span><output id="meterValue">待機</output></div>
+            <div class="meter-track"><span id="meterFill"></span></div>
+          </div>
         </div>
 
         <div class="presets" aria-label="プリセット">
@@ -54,6 +58,16 @@
 
         <p class="hint">設定はこのチャンネル専用として保存され、次回から自動で適用されます。</p>
         <div id="warning" class="warning hidden" role="status"></div>
+
+        <details class="shortcuts">
+          <summary>キーボードショートカット</summary>
+          <div class="shortcut-grid">
+            <span>5%上げる</span><kbd data-mac="⌘">Alt</kbd><b>＋</b><kbd>Shift</kbd><b>＋</b><kbd>↑</kbd>
+            <span>5%下げる</span><kbd data-mac="⌘">Alt</kbd><b>＋</b><kbd>Shift</kbd><b>＋</b><kbd>↓</kbd>
+            <span>100%に戻す</span><kbd data-mac="⌘">Alt</kbd><b>＋</b><kbd>Shift</kbd><b>＋</b><kbd>0</kbd>
+            <span>有効切替</span><kbd data-mac="⌘">Alt</kbd><b>＋</b><kbd>Shift</kbd><b>＋</b><kbd>M</kbd>
+          </div>
+        </details>
 
         <footer>
           <button id="reset" class="text-button" type="button">このチャンネルをリセット</button>

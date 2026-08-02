@@ -10,12 +10,19 @@
     connection: document.querySelector("#connection"),
     gain: document.querySelector("#gain"),
     gainValue: document.querySelector("#gainValue"),
+    meterFill: document.querySelector("#meterFill"),
+    meterValue: document.querySelector("#meterValue"),
     warning: document.querySelector("#warning"),
     reset: document.querySelector("#reset"),
     options: document.querySelector("#openOptions")
   };
   let tabId = null;
   let saveTimer = null;
+  let meterTimer = null;
+
+  if (navigator.platform.toLowerCase().includes("mac")) {
+    for (const key of document.querySelectorAll("kbd[data-mac]")) key.textContent = key.dataset.mac;
+  }
 
   function setSlider(gain) {
     const percentage = Math.round(Number(gain) * 100);
@@ -30,6 +37,25 @@
   function showWarning(message) {
     elements.warning.textContent = message || "";
     elements.warning.classList.toggle("hidden", !message);
+  }
+
+  function renderEngine(status) {
+    const connected = Boolean(status.engine?.connected);
+    const neutral = Number(status.gain) === 1;
+    elements.connection.textContent = !status.enabled
+      ? "無効"
+      : neutral
+        ? "補正なし"
+        : connected
+          ? "補正中"
+          : "プレイヤー待機中";
+    elements.connection.classList.toggle("connected", status.enabled && (connected || neutral));
+
+    const level = connected && status.enabled ? Number(status.engine?.level || 0) : 0;
+    const percentage = Math.round(Math.min(1, Math.max(0, level)) * 100);
+    elements.meterFill.style.setProperty("--level", `${percentage}%`);
+    elements.meterValue.value = connected ? `${percentage}%` : "待機";
+    showWarning(status.engine?.error ? `音声処理を開始できませんでした: ${status.engine.error}` : "");
   }
 
   function render(status) {
@@ -47,17 +73,7 @@
     document.body.classList.toggle("disabled", !status.enabled);
     setSlider(status.gain);
 
-    const connected = Boolean(status.engine?.connected);
-    const neutral = Number(status.gain) === 1;
-    elements.connection.textContent = !status.enabled
-      ? "無効"
-      : neutral
-        ? "補正なし"
-        : connected
-          ? "補正中"
-          : "プレイヤー待機中";
-    elements.connection.classList.toggle("connected", status.enabled && (connected || neutral));
-    showWarning(status.engine?.error ? `音声処理を開始できませんでした: ${status.engine.error}` : "");
+    renderEngine(status);
   }
 
   async function send(message) {
@@ -73,6 +89,10 @@
     if (tabId === null) return render(null);
     try {
       render(await send({ type: "GET_STATUS" }));
+      render(await send({ type: "START_METERING" }));
+      meterTimer = setInterval(async () => {
+        try { renderEngine(await send({ type: "GET_STATUS" })); } catch {}
+      }, 150);
     } catch {
       render(null);
     }
@@ -106,5 +126,9 @@
   }
 
   elements.options.addEventListener("click", () => chrome.runtime.openOptionsPage());
+  window.addEventListener("pagehide", () => {
+    clearInterval(meterTimer);
+    send({ type: "STOP_METERING" }).catch(() => {});
+  }, { once: true });
   load();
 })();

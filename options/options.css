@@ -5,6 +5,14 @@ main { width: min(680px, calc(100% - 40px)); margin: 0 auto; padding: 64px 0; }
 .eyebrow { margin: 0 0 10px; color: #a970ff; font-size: 11px; font-weight: 800; letter-spacing: .2em; }
 h1 { margin: 0; font-size: 32px; letter-spacing: -.04em; }
 .lead { margin: 10px 0 30px; color: #9b95a3; }
+.sync-note { display: inline-flex; align-items: center; gap: 7px; margin: -16px 0 24px; color: #817a8a; font-size: 11px; }
+.sync-note span { width: 7px; height: 7px; border-radius: 50%; background: #67e3b0; box-shadow: 0 0 10px #67e3b077; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 9px; margin-bottom: 10px; }
+.toolbar button { padding: 9px 13px; border: 1px solid #ffffff12; border-radius: 8px; background: #ffffff08; color: #c6c0cf; cursor: pointer; }
+.toolbar button:hover { border-color: #a970ff66; color: #dfd0f7; }
+.toolbar .primary { border-color: #9147ff66; background: #9147ff24; color: #d8c2fa; }
+.message { min-height: 18px; margin: 0 0 10px; color: #67e3b0; font-size: 11px; }
+.message.error { color: #ff9fa8; }
 #list { display: grid; gap: 9px; }
 .row, .empty { display: flex; align-items: center; justify-content: space-between; min-height: 66px; padding: 14px 18px; border: 1px solid #ffffff12; border-radius: 13px; background: #ffffff08; }
 .empty { justify-content: center; color: #87818e; }

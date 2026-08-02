@@ -11,9 +11,17 @@
       <p class="eyebrow">TWITCH VOLUME BALANCE</p>
       <h1>保存済みチャンネル</h1>
       <p class="lead">配信ページで保存した音量補正を確認・削除できます。</p>
+      <div class="sync-note"><span></span>Chrome Syncで端末間同期</div>
+      <div class="toolbar">
+        <button id="exportSettings" class="primary" type="button">JSONを書き出す</button>
+        <button id="importSettings" type="button">JSONを読み込む</button>
+        <input id="importFile" type="file" accept="application/json,.json" hidden>
+      </div>
+      <p id="message" class="message" role="status"></p>
       <section id="list" aria-live="polite"></section>
       <button id="clearAll" class="danger" type="button">すべての設定を削除</button>
     </main>
+    <script src="../lib/storage.js"></script>
     <script src="options.js"></script>
   </body>
 </html>
