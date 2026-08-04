@@ -13,6 +13,13 @@
   let metering = false;
   let lastUrl = location.href;
 
+  function resolveChannel() {
+    const fromUrl = helpers.getChannelFromUrl(location.href);
+    if (fromUrl) return fromUrl;
+    if (!helpers.getVideoIdFromUrl(location.href)) return null;
+    return helpers.getChannelFromDocument(document);
+  }
+
   function currentGain() {
     return channel ? helpers.clampGain(settings.gains[channel] ?? 1) : 1;
   }
@@ -40,7 +47,7 @@
 
   async function loadSettings() {
     settings = await storage.loadSettings();
-    channel = helpers.getChannelFromUrl(location.href);
+    channel = resolveChannel();
     sendConfiguration();
   }
 
@@ -120,9 +127,11 @@
   });
 
   setInterval(() => {
-    if (location.href === lastUrl) return;
-    lastUrl = location.href;
-    channel = helpers.getChannelFromUrl(lastUrl);
+    const nextUrl = location.href;
+    const nextChannel = resolveChannel();
+    if (nextUrl === lastUrl && nextChannel === channel) return;
+    lastUrl = nextUrl;
+    channel = nextChannel;
     sendConfiguration();
   }, 750);
 

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Twitch Volume Balance",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "配信者ごとの音量差を記憶し、Twitchの再生音量を自動で補正します。",
   "minimum_chrome_version": "102",
   "icons": {
