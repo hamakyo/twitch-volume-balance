@@ -12,12 +12,24 @@
   let engine = { connected: false, contextState: "unknown", error: null, videoCount: 0, level: 0 };
   let metering = false;
   let lastUrl = location.href;
+  let routeStartedAt = Date.now();
+  let identity = helpers.resolvePageIdentity(lastUrl, document, false);
+  let identityRefreshRunning = false;
+  const ARCHIVE_FALLBACK_DELAY_MS = 5000;
 
-  function resolveChannel() {
-    const fromUrl = helpers.getChannelFromUrl(location.href);
-    if (fromUrl) return fromUrl;
-    if (!helpers.getVideoIdFromUrl(location.href)) return null;
-    return helpers.getChannelFromDocument(document);
+  function identitySignature(value) {
+    return [value.key, value.route, value.resolution, value.videoId].join(":");
+  }
+
+  function logIdentity(value) {
+    const detail = {
+      route: value.route,
+      resolution: value.resolution,
+      channel: value.key,
+      videoId: value.videoId
+    };
+    const logger = value.resolution === "vod-fallback" ? console.warn : console.info;
+    logger("[Twitch Volume Balance] 配信者の検出状態", detail);
   }
 
   function currentGain() {
@@ -39,15 +51,54 @@
     return {
       ok: true,
       channel,
+      channelLabel: identity.label,
       enabled: settings.enabled,
       gain: currentGain(),
-      engine
+      engine,
+      diagnostics: {
+        route: identity.route,
+        resolution: identity.resolution,
+        videoId: identity.videoId
+      }
     };
+  }
+
+  async function migrateArchiveFallback(previous, next) {
+    if (previous.resolution !== "vod-fallback" || next.resolution !== "dom") return;
+    if (!(previous.key in settings.gains) || next.key in settings.gains) return;
+    settings = await storage.setChannelGain(next.key, settings.gains[previous.key]);
+    settings = await storage.removeChannel(previous.key);
+  }
+
+  async function refreshIdentity() {
+    if (identityRefreshRunning) return;
+    identityRefreshRunning = true;
+    try {
+      const nextUrl = location.href;
+      if (nextUrl !== lastUrl) {
+        lastUrl = nextUrl;
+        routeStartedAt = Date.now();
+      }
+      const allowVideoFallback = Date.now() - routeStartedAt >= ARCHIVE_FALLBACK_DELAY_MS;
+      const nextIdentity = helpers.resolvePageIdentity(nextUrl, document, allowVideoFallback);
+      if (identitySignature(nextIdentity) === identitySignature(identity)) return;
+
+      const previous = identity;
+      await migrateArchiveFallback(previous, nextIdentity);
+      identity = nextIdentity;
+      channel = identity.key;
+      logIdentity(identity);
+      sendConfiguration();
+    } finally {
+      identityRefreshRunning = false;
+    }
   }
 
   async function loadSettings() {
     settings = await storage.loadSettings();
-    channel = resolveChannel();
+    identity = helpers.resolvePageIdentity(location.href, document, false);
+    channel = identity.key;
+    logIdentity(identity);
     sendConfiguration();
   }
 
@@ -126,14 +177,9 @@
     sendConfiguration();
   });
 
-  setInterval(() => {
-    const nextUrl = location.href;
-    const nextChannel = resolveChannel();
-    if (nextUrl === lastUrl && nextChannel === channel) return;
-    lastUrl = nextUrl;
-    channel = nextChannel;
-    sendConfiguration();
-  }, 750);
+  setInterval(() => refreshIdentity().catch((error) => {
+    console.warn("[Twitch Volume Balance] 配信者情報の更新に失敗しました", error);
+  }), 750);
 
   loadSettings().catch(() => {});
 })();

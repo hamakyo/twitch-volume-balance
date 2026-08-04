@@ -14,6 +14,11 @@
     message.classList.toggle("error", isError);
   }
 
+  function displayName(storageKey) {
+    const archive = storageKey.match(/^vod_(\d+)$/);
+    return archive ? `アーカイブ ${archive[1]}` : storageKey;
+  }
+
   async function render() {
     const { gains } = await storage.loadSettings();
     const entries = Object.entries(gains).sort(([a], [b]) => a.localeCompare(b));
@@ -35,7 +40,7 @@
       const info = document.createElement("div");
       info.className = "channel";
       const name = document.createElement("strong");
-      name.textContent = channel;
+      name.textContent = displayName(channel);
       const value = document.createElement("span");
       value.textContent = `音量補正 ${Math.round(Number(gain) * 100)}%`;
       info.append(name, value);

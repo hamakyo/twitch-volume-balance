@@ -36,6 +36,9 @@ function createArea(initial = {}) {
   assert.equal(updated.gains.another_channel, 2);
   assert.equal(updated.gains.some_streamer, 1.26);
 
+  const archiveUpdated = await storage.setChannelGain("vod_123456", 0.85);
+  assert.equal(archiveUpdated.gains.vod_123456, 0.85);
+
   const removed = await storage.removeChannel("some_streamer");
   assert.equal("some_streamer" in removed.gains, false);
 

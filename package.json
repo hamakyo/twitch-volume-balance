@@ -1,0 +1,17 @@
+{
+  "name": "twitch-volume-balance",
+  "version": "0.2.1",
+  "private": true,
+  "description": "Twitch配信者ごとの音量補正を保存するChrome拡張",
+  "scripts": {
+    "check": "node scripts/check.mjs",
+    "test": "node scripts/test.mjs",
+    "package": "npm run check && npm test && node scripts/package.mjs"
+  },
+  "devDependencies": {
+    "adm-zip": "0.6.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

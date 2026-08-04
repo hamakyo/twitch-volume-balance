@@ -4,6 +4,8 @@
   const elements = {
     loading: document.querySelector("#loading"),
     unsupported: document.querySelector("#unsupported"),
+    unsupportedTitle: document.querySelector("#unsupportedTitle"),
+    unsupportedText: document.querySelector("#unsupportedText"),
     controls: document.querySelector("#controls"),
     enabled: document.querySelector("#enabled"),
     channel: document.querySelector("#channelName"),
@@ -13,12 +15,14 @@
     meterFill: document.querySelector("#meterFill"),
     meterValue: document.querySelector("#meterValue"),
     warning: document.querySelector("#warning"),
+    saveHint: document.querySelector("#saveHint"),
     reset: document.querySelector("#reset"),
     options: document.querySelector("#openOptions")
   };
   let tabId = null;
   let saveTimer = null;
   let meterTimer = null;
+  let lastRenderSignature = null;
 
   if (navigator.platform.toLowerCase().includes("mac")) {
     for (const key of document.querySelectorAll("kbd[data-mac]")) key.textContent = key.dataset.mac;
@@ -55,12 +59,32 @@
     const percentage = Math.round(Math.min(1, Math.max(0, level)) * 100);
     elements.meterFill.style.setProperty("--level", `${percentage}%`);
     elements.meterValue.value = connected ? `${percentage}%` : "待機";
-    showWarning(status.engine?.error ? `音声処理を開始できませんでした: ${status.engine.error}` : "");
+    const warnings = [];
+    if (status.diagnostics?.resolution === "vod-fallback") {
+      warnings.push("配信者を検出できなかったため、このアーカイブ専用の設定として保存します。Twitch側の画面構成が変わった可能性があります。");
+    }
+    if (status.engine?.error) warnings.push(`音声処理を開始できませんでした: ${status.engine.error}`);
+    showWarning(warnings.join("\n"));
   }
 
   function render(status) {
+    lastRenderSignature = JSON.stringify([
+      status?.channel || null,
+      status?.channelLabel || null,
+      status?.diagnostics?.resolution || null,
+      status?.enabled ?? null,
+      status?.gain ?? null
+    ]);
     elements.loading.classList.add("hidden");
     if (!status?.ok || !status.channel) {
+      const archivePending = status?.diagnostics?.route === "archive"
+        && status.diagnostics.resolution === "pending";
+      elements.unsupportedTitle.textContent = archivePending
+        ? "アーカイブの配信者情報を読み込んでいます"
+        : "Twitch の配信またはアーカイブページを開いてください";
+      elements.unsupportedText.textContent = archivePending
+        ? "数秒後に自動で再検出します。ポップアップを開いたままお待ちください。"
+        : "すでに開いている場合は、拡張機能の追加後にページを再読み込みします。";
       elements.unsupported.classList.remove("hidden");
       elements.controls.classList.add("hidden");
       return;
@@ -68,7 +92,10 @@
 
     elements.unsupported.classList.add("hidden");
     elements.controls.classList.remove("hidden");
-    elements.channel.textContent = status.channel;
+    elements.channel.textContent = status.channelLabel || status.channel;
+    elements.saveHint.textContent = status.diagnostics?.resolution === "vod-fallback"
+      ? "設定はこのアーカイブ専用として保存されます。"
+      : "設定はこのチャンネル専用として保存され、次回から自動で適用されます。";
     elements.enabled.checked = status.enabled;
     document.body.classList.toggle("disabled", !status.enabled);
     setSlider(status.gain);
@@ -91,7 +118,18 @@
       render(await send({ type: "GET_STATUS" }));
       render(await send({ type: "START_METERING" }));
       meterTimer = setInterval(async () => {
-        try { renderEngine(await send({ type: "GET_STATUS" })); } catch {}
+        try {
+          const status = await send({ type: "GET_STATUS" });
+          const signature = JSON.stringify([
+            status?.channel || null,
+            status?.channelLabel || null,
+            status?.diagnostics?.resolution || null,
+            status?.enabled ?? null,
+            status?.gain ?? null
+          ]);
+          if (signature === lastRenderSignature) renderEngine(status);
+          else render(status);
+        } catch {}
       }, 150);
     } catch {
       render(null);
